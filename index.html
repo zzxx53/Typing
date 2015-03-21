@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Typing Speed Test</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    </head>
+    <body>
+        <div class="container">
+            <h3>Text input: </h3>
+            <textarea id="source" rows="15" cols="100"></textarea><br />
+            <button id="start" class="btn btn-primary">Start Typing</button><br />
+            <div class="container" style="margin:20px">
+                <div id="target" class="well">Words to be typed will appear here</div>
+                <h4>Average Typing Speed: <span id="speed">0</span> WPM</h4>
+                <h4>Accuracy: <span id="accuracy">0</span>%</h4>
+                <input id="typing" class="form-control" style="width:50%"><br />
+            </div>
+        </div>
+        
+        
+        <script>
+            var text;
+            var current_word;
+            var parsed;
+            var start_time;
+            var error_words;
+            var has_error;
+            var runonce=0;
+            $(function(){
+                $('#start').click(function(){
+                    text=$('#source').val().split(/[ \r\n]+/);
+                    if (text.length<=1){
+                        alert('Source empty');
+                        return;
+                    }
+                    $('#target').empty();
+                    for (var i=0;i<text.length;i++){
+                        text[i]=text[i].replace("’","'").replace("‘","'").replace("“","\"").replace("”","\"").replace("–","-");
+                        var html='<span id="word_'+i+'">'+text[i]+' </span>';
+                        $('#target').append(html);
+                    }
+                    parsed=true;
+                    current_word=0;
+                    error_words=0;
+                    $('#word_'+current_word).css({'color' : '#ff0000'});
+                    runonce=false;
+                });
+                
+                $('#typing').focus(function(){
+                    if (!runonce){
+                        start_time=new Date().getTime();
+                    }
+                });
+
+                $('#typing').keyup(function(){
+                    var target_word=text[current_word]+' ';
+                    if (target_word.indexOf($('#typing').val())!==0){
+                        $('#typing').css({'background-color' : '#ff9494'});
+                        has_error=true;
+                        return;
+                    } else {
+                        $('#typing').css({'background-color' : '#99FF99'});
+                    }
+                    if (target_word===$('#typing').val()){
+                        if (has_error) {
+                            error_words++;
+                            has_error=false;
+                        }
+                        if (current_word<text.length){
+                            current_word++;
+                            $('#typing').val('').css({'background-color' : '#fff'});
+                            $('#word_'+(current_word-1)).css({'color' : '#000'});
+                            $('#word_'+current_word).css({'color' : '#ff0000'});
+                        } else {
+                            $('#typing').val('').css({'background-color' : '#fff'});
+                            $('#word_'+current_word).css({'color' : '#000'});
+                        }
+                    }
+                    if (current_word<=text.length){
+                        var now=new Date().getTime();
+                        var wpm=(current_word+1)/((now-start_time)/1000/60);
+                        $('#speed').text(Math.round(wpm).toString());
+                        var accu=(current_word+1-error_words)/(current_word+1)*100;
+                        $('#accuracy').text(Math.round(accu).toString());
+                    }
+                });
+            });
+            
+        </script>
+    </body>
+</html>
